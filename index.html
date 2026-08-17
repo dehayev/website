@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imtiaz Hossain Hredoy — Video Editor & Colorist</title>
+    <meta name="description"
+        content="Portfolio of Imtiaz Hossain Hredoy, a passionate Video Editor & Colorist based in Mirpur, Dhaka, Bangladesh, crafting high-energy cuts, narrative storytelling, and cinematic color science.">
+
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: '#030303',
+                        surface: '#09090b',
+                        'surface-light': '#121215',
+                        'border-subtle': '#27272a',
+                        'border-glow': 'rgba(255, 255, 255, 0.15)',
+                        accent: '#ffffff',
+                        'accent-gold': '#d4af37',
+                        'accent-cyan': '#00f0ff',
+                        muted: '#a1a1aa',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        display: ['Outfit', 'Inter', '-apple-system', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.8)',
+                        'glow': '0 0 50px -10px rgba(255, 255, 255, 0.15)',
+                        'nav': '0 4px 30px rgba(0, 0, 0, 0.9)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- GSAP & ScrollTrigger CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Base Styling */
+        body {
+            background-color: #030303;
+            color: #f4f4f5;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow-x: hidden;
+        }
+
+        ::selection {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        /* Glassmorphism panel base */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card {
+            background: rgba(18, 18, 21, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.9), 0 0 30px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        /* Nav Link Active Indicator */
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            width: 0%;
+            height: 2px;
+            background: #ffffff;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 80%;
+        }
+
+        /* Dynamic Noise Overlay */
+        .bg-noise {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.025'/%3E%3C/svg%3E");
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #030303;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f3f46;
+        }
+
+        /* Video Card Aspect Ratio & Overlay Animation */
+        .video-card-thumb {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+        }
+
+        .video-card-thumb img {
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card:hover .video-card-thumb img {
+            transform: scale(1.06);
+        }
+
+        .play-btn-glow {
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover .play-btn-glow {
+            transform: scale(1.12);
+            box-shadow: 0 0 35px rgba(255, 255, 255, 0.5);
+            background: #ffffff;
+            color: #000000;
+        }
+
+        /* Modal Fade */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Hide scrollbars for clean UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-obsidian text-zinc-100 antialiased bg-noise">
+
+    <!-- INTERACTIVE ANIMATED CANVAS BACKGROUND -->
+    <canvas id="bg-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0 opacity-60"></canvas>
+
+    <!-- FIXED TOP NAVIGATION BAR -->
+    <header id="navbar"
+        class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4 px-4 sm:px-8 md:px-12 backdrop-blur-2xl bg-black/80 border-b border-white/10">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Brand Logo / Name -->
+            <a href="#hero" class="flex items-center gap-3 group">
+                <div
+                    class="w-10 h-10 md:w-11 md:h-11 rounded-full overflow-hidden border border-white/20 group-hover:scale-105 transition-transform duration-300 shrink-0">
+                    <img src="pfp.jpeg" alt="Imtiaz Hossain Hredoy" class="w-full h-full object-cover">
+                </div>
+                <div class="flex flex-col">
+                    <span
+                        class="font-display font-extrabold text-white text-base md:text-lg tracking-wider leading-snug group-hover:text-zinc-200 transition-colors">
+                        IMTIAZ HOSSAIN HREDOY
+                    </span>
+                    <span class="text-[11px] text-zinc-400 tracking-widest uppercase font-semibold">
+                        Video Editor & Colorist
+                    </span>
+                </div>
+            </a>
+
+            <!-- Central Desktop Nav Links -->
+            <nav
+                class="hidden md:flex items-center gap-8 bg-white/[0.05] backdrop-blur-xl px-7 py-2.5 rounded-full border border-white/10 text-sm font-semibold text-zinc-300">
+                <a href="#works" class="nav-link hover:text-white transition-colors">Works</a>
+                <a href="#skills" class="nav-link hover:text-white transition-colors">Skills</a>
+                <a href="#process" class="nav-link hover:text-white transition-colors">Process</a>
+                <a href="#insights" class="nav-link hover:text-white transition-colors">Insights</a>
+                <a href="#contact" class="nav-link hover:text-white transition-colors">Contact</a>
+            </nav>
+
+            <!-- Right Contact CTA -->
+            <div class="flex items-center gap-3">
+                <a href="#contact"
+                    class="hidden sm:inline-flex px-5 py-2.5 rounded-full bg-white text-black font-bold text-xs md:text-sm hover:bg-zinc-200 transition-all duration-300 shadow-glow items-center justify-center tracking-wider uppercase">
+                    Let's Work Together
+                </a>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn"
+                    class="md:hidden p-2.5 rounded-xl bg-white/10 text-white hover:bg-white/20 border border-white/10 flex items-center justify-center"
+                    aria-label="Toggle Menu">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer Navigation -->
+        <div id="mobile-menu"
+            class="hidden md:hidden absolute top-full left-0 right-0 glass-panel bg-black/95 backdrop-blur-2xl border-b border-white/10 px-6 py-6 flex flex-col gap-4 text-base font-bold shadow-2xl">
+            <a href="#works"
+                class="mobile-link text-zinc-200 hover:text-white py-3 border-b border-white/10 flex items-center justify-between">
+                <span>Featured Works</span>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-500"></i>
+            </a>
+            <a href="#skills"
+                class="mobile-link text-zinc-200 hover:text-white py-3 border-b border-white/10 flex items-center justify-between">
+                <span>Skills & Expertise</span>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-500"></i>
+            </a>
+            <a href="#process"
+                class="mobile-link text-zinc-200 hover:text-white py-3 border-b border-white/10 flex items-center justify-between">
+                <span>Creative Process</span>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-500"></i>
+            </a>
+            <a href="#insights"
+                class="mobile-link text-zinc-200 hover:text-white py-3 border-b border-white/10 flex items-center justify-between">
+                <span>Insights & FAQ</span>
+                <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-500"></i>
+            </a>
+            <a href="#contact"
+                class="mobile-link text-zinc-200 hover:text-white py-3 flex items-center justify-between">
+                <span>Contact</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 text-white"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section id="hero"
+        class="relative min-h-[85vh] flex items-center pt-36 pb-20 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto z-10">
+        <div class="w-full flex flex-col items-start gap-8">
+
+            <!-- Skill Tagline Badge -->
+            <div
+                class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.06] border border-white/15 backdrop-blur-md">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                <span class="text-xs uppercase tracking-widest font-semibold text-zinc-300">
+                    Cinematic Storyteller & Colorist
+                </span>
+            </div>
+
+            <!-- Headline -->
+            <h1
+                class="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold text-white tracking-tight leading-[1.05] max-w-5xl">
+                CRAFTING CINEMATIC <br class="hidden sm:inline">
+                <span class="bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-transparent">
+                    MOTION, CUTS
+                </span> & COLOR.
+            </h1>
+
+            <!-- Subtitle -->
+            <p class="text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl font-light leading-relaxed">
+                Passionate Video Editor and Colorist turning raw footage into impactful visual stories. Combining
+                editorial rhythm, narrative emotional pacing, and filmic color science across commercials, music videos,
+                narrative films, and event highlights.
+            </p>
+
+            <!-- Hero Action Buttons -->
+            <div class="flex flex-wrap items-center gap-4 pt-4">
+                <a href="#works"
+                    class="px-8 py-4 rounded-full bg-white text-black font-bold text-sm hover:bg-zinc-200 transition-all duration-300 shadow-glow flex items-center gap-3 group">
+                    <span>EXPLORE FEATURED WORKS</span>
+                    <i data-lucide="arrow-down-right"
+                        class="w-4 h-4 group-hover:translate-x-0.5 group-hover:translate-y-0.5 transition-transform"></i>
+                </a>
+                <button onclick="openVideoModal('1ppbOKYLsOXkPKngUy1WzGIdKCvBfPB25', 0)"
+                    class="px-8 py-4 rounded-full glass-panel hover:bg-white/10 border border-white/20 font-bold text-sm text-white transition-all duration-300 flex items-center gap-3">
+                    <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                    <span>WATCH REEL</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- WORKS SECTION (PURE VISUAL VIDEO CARDS GRID WITH GUARANTEED THUMBNAILS) -->
+    <section id="works" class="py-24 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto relative z-10 border-t border-white/10">
+        <!-- Section Header -->
+        <div class="mb-16">
+            <span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Selected Portfolio</span>
+            <h2 class="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-2">
+                FEATURED VIDEO WORKS
+            </h2>
+        </div>
+
+        <!-- 13 Video Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8" id="video-cards-grid">
+            <!-- Cards populated dynamically by JS -->
+        </div>
+    </section>
+
+    <!-- CORE SKILLS & EXPERTISE SECTION -->
+    <section id="skills" class="py-24 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto relative z-10 border-t border-white/10">
+        <div class="mb-16">
+            <span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Craft & Capabilities</span>
+            <h2 class="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-2">
+                CORE SKILLS & EXPERTISE
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Skill 1 -->
+            <div class="glass-card p-8 rounded-3xl flex flex-col justify-between gap-6">
+                <div
+                    class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/10">
+                    <i data-lucide="film" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-bold text-white mb-2">Cinematic Narrative & Pacing</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">
+                        Mastering the emotional arc of every edit. Selecting pivotal moments, raw expressions, and
+                        unscripted beats to build deeply engaging visual stories.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Skill 2 -->
+            <div class="glass-card p-8 rounded-3xl flex flex-col justify-between gap-6">
+                <div
+                    class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/10">
+                    <i data-lucide="palette" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-bold text-white mb-2">Color Grading & Color Science</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">
+                        Transforming flat camera log profiles (S-Log3, Arri LogC, RED, BRAW) into rich, filmic palettes
+                        with natural skin tones and grain emulation.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Skill 3 -->
+            <div class="glass-card p-8 rounded-3xl flex flex-col justify-between gap-6">
+                <div
+                    class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/10">
+                    <i data-lucide="zap" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-bold text-white mb-2">High-Energy Rhythm & Cutting</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">
+                        Cutting to beat, speed ramps, and high-impact transitions designed to capture attention
+                        immediately for social reels, commercials, and music videos.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Skill 4 -->
+            <div class="glass-card p-8 rounded-3xl flex flex-col justify-between gap-6">
+                <div
+                    class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/10">
+                    <i data-lucide="volume-2" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-bold text-white mb-2">Sound Design & Audio Restoration</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">
+                        Dialogue isolation, noise reduction, vocal cleaning, impact layering, and balancing score
+                        dynamics for crisp, broadcast-ready audio.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Skill 5 -->
+            <div class="glass-card p-8 rounded-3xl flex flex-col justify-between gap-6">
+                <div
+                    class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/10">
+                    <i data-lucide="layers" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-bold text-white mb-2">Multi-Cam Synchronization</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">
+                        Organizing and editing complex multi-camera setups for live events, ceremonies, interviews, and
+                        multi-angle stage performances seamlessly.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Skill 6 -->
+            <div class="glass-card p-8 rounded-3xl flex flex-col justify-between gap-6">
+                <div
+                    class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/10">
+                    <i data-lucide="sparkles" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-bold text-white mb-2">Compositing & Visual Cleanups</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">
+                        Optical flow frame rate smoothing, sky enhancements, subtle object cleanups, wire removals, and
+                        title animations.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CREATIVE PROCESS SECTION -->
+    <section id="process" class="py-24 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto relative z-10 border-t border-white/10">
+        <div class="mb-16">
+            <span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Editing Methodology</span>
+            <h2 class="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-2">
+                THE CREATIVE WORKFLOW
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Step 1 -->
+            <div class="glass-card p-8 rounded-3xl flex flex-col justify-between gap-6">
+                <div class="flex items-center justify-between">
+                    <span
+                        class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center font-display font-bold text-white text-lg border border-white/10">01</span>
+                    <i data-lucide="scissors" class="w-6 h-6 text-zinc-400"></i>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-bold text-white mb-2">Ingest & Story Curation</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">
+                        Organizing multi-cam footage, logging audio takes, and selecting the most compelling moments to
+                        build a solid narrative timeline.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="glass-card p-8 rounded-3xl flex flex-col justify-between gap-6">
+                <div class="flex items-center justify-between">
+                    <span
+                        class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center font-display font-bold text-white text-lg border border-white/10">02</span>
+                    <i data-lucide="palette" class="w-6 h-6 text-zinc-400"></i>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-bold text-white mb-2">Color Grading & Film Look</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">
+                        Applying color space transforms, balancing skin tones, matching shots across different cameras,
+                        and crafting filmic color grades.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="glass-card p-8 rounded-3xl flex flex-col justify-between gap-6">
+                <div class="flex items-center justify-between">
+                    <span
+                        class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center font-display font-bold text-white text-lg border border-white/10">03</span>
+                    <i data-lucide="sparkles" class="w-6 h-6 text-zinc-400"></i>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-bold text-white mb-2">Motion & VFX Polish</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">
+                        Enhancing motion with smooth speed ramps, optical flow frame rate interpolation, title graphics,
+                        and seamless visual cleanups.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="glass-card p-8 rounded-3xl flex flex-col justify-between gap-6">
+                <div class="flex items-center justify-between">
+                    <span
+                        class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center font-display font-bold text-white text-lg border border-white/10">04</span>
+                    <i data-lucide="volume-2" class="w-6 h-6 text-zinc-400"></i>
+                </div>
+                <div>
+                    <h3 class="font-display text-xl font-bold text-white mb-2">Audio Master & Delivery</h3>
+                    <p class="text-zinc-400 text-sm leading-relaxed">
+                        Fine-tuning dialogue clarity, sound effects, music dynamics, and exporting high-bitrate master
+                        files tailored for web or broadcast.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- INSIGHTS & FAQ ACCORDION SECTION -->
+    <section id="insights" class="py-24 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto relative z-10 border-t border-white/10">
+        <div class="mb-16">
+            <span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Knowledge & Clarity</span>
+            <h2 class="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-2">
+                INSIGHTS & FREQUENTLY ASKED
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <!-- Left Insight Cards -->
+            <div class="lg:col-span-5 flex flex-col gap-6">
+                <div class="glass-card p-6 rounded-2xl flex flex-col gap-3">
+                    <span class="text-xs text-zinc-400 uppercase tracking-widest font-bold">Workflow Insight #01</span>
+                    <h4 class="font-bold text-white text-lg">Log to Film Look Transformation</h4>
+                    <p class="text-xs text-zinc-400 leading-relaxed">
+                        Converting flat Log camera profiles into rich, filmic color spaces using color transforms
+                        without clipping highlights or muddying skin tones.
+                    </p>
+                </div>
+
+                <div class="glass-card p-6 rounded-2xl flex flex-col gap-3">
+                    <span class="text-xs text-zinc-400 uppercase tracking-widest font-bold">Workflow Insight #02</span>
+                    <h4 class="font-bold text-white text-lg">High-Energy Pacing & Sound Layering</h4>
+                    <p class="text-xs text-zinc-400 leading-relaxed">
+                        Layering impacts, risers, and vocal isolations to make commercial promos and music video edits
+                        hit with maximum emotional impact.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right FAQ Accordion -->
+            <div class="lg:col-span-7 flex flex-col gap-4" id="faq-accordion">
+                <!-- FAQ 1 -->
+                <div class="glass-panel rounded-2xl border border-white/10 overflow-hidden">
+                    <button
+                        class="faq-btn w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-base text-white hover:text-zinc-200 transition-colors">
+                        <span>What types of video projects do you edit?</span>
+                        <i data-lucide="chevron-down"
+                            class="w-5 h-5 text-zinc-400 transition-transform duration-300"></i>
+                    </button>
+                    <div
+                        class="faq-answer hidden px-6 pb-6 text-sm text-zinc-400 leading-relaxed border-t border-white/5 pt-4">
+                        I edit all kinds of video projects—including commercial promos, brand videos, music videos,
+                        narrative shorts, social media reels, documentaries, and wedding films.
+                    </div>
+                </div>
+
+                <!-- FAQ 2 -->
+                <div class="glass-panel rounded-2xl border border-white/10 overflow-hidden">
+                    <button
+                        class="faq-btn w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-base text-white hover:text-zinc-200 transition-colors">
+                        <span>How do we transfer raw video footage to you?</span>
+                        <i data-lucide="chevron-down"
+                            class="w-5 h-5 text-zinc-400 transition-transform duration-300"></i>
+                    </button>
+                    <div
+                        class="faq-answer hidden px-6 pb-6 text-sm text-zinc-400 leading-relaxed border-t border-white/5 pt-4">
+                        You can send raw footage via Google Drive, Dropbox, MASV, or WeTransfer. I collaborate smoothly
+                        with directors, agencies, and videographers globally.
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="glass-panel rounded-2xl border border-white/10 overflow-hidden">
+                    <button
+                        class="faq-btn w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-base text-white hover:text-zinc-200 transition-colors">
+                        <span>Can you match our brand's color style or lookbook?</span>
+                        <i data-lucide="chevron-down"
+                            class="w-5 h-5 text-zinc-400 transition-transform duration-300"></i>
+                    </button>
+                    <div
+                        class="faq-answer hidden px-6 pb-6 text-sm text-zinc-400 leading-relaxed border-t border-white/5 pt-4">
+                        Yes! I can grade to match your exact brand guidelines, reference videos, or custom LUTs, as well
+                        as design custom node trees tailored to your aesthetic.
+                    </div>
+                </div>
+
+                <!-- FAQ 4 -->
+                <div class="glass-panel rounded-2xl border border-white/10 overflow-hidden">
+                    <button
+                        class="faq-btn w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-base text-white hover:text-zinc-200 transition-colors">
+                        <span>Where are you based and how do we work together?</span>
+                        <i data-lucide="chevron-down"
+                            class="w-5 h-5 text-zinc-400 transition-transform duration-300"></i>
+                    </button>
+                    <div
+                        class="faq-answer hidden px-6 pb-6 text-sm text-zinc-400 leading-relaxed border-t border-white/5 pt-4">
+                        I am based in Mirpur, Dhaka, Bangladesh, working remotely with clients, studios, and
+                        videographers worldwide.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT & FOOTER SECTION (DIRECT EMAIL SUBMISSION VIA FORMSUBMIT) -->
+    <section id="contact" class="py-24 px-4 sm:px-8 md:px-12 max-w-7xl mx-auto relative z-10 border-t border-white/10">
+        <div class="glass-panel p-8 sm:p-14 rounded-3xl border border-white/15 grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <!-- Left Info -->
+            <div class="lg:col-span-5 flex flex-col justify-between gap-8">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Get In Touch</span>
+                    <h2 class="font-display text-3xl sm:text-5xl font-extrabold text-white tracking-tight mt-2">
+                        LET'S CREATE SOMETHING EXTRAORDINARY ✨
+                    </h2>
+                    <p class="text-zinc-400 text-sm mt-4 leading-relaxed">
+                        Available for remote video editing, color grading contracts, commercial promos, music videos,
+                        and studio collaborations worldwide.
+                    </p>
+                </div>
+
+                <div class="flex flex-col gap-4 text-sm font-semibold text-zinc-300">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="mail" class="w-5 h-5 text-white shrink-0"></i>
+                        <a href="mailto:hredoy2001@gmail.com"
+                            class="hover:text-white transition-colors">hredoy2001@gmail.com</a>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="phone" class="w-5 h-5 text-white shrink-0"></i>
+                        <a href="https://wa.me/8801641901335" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">+880 1641-901335 (WhatsApp)</a>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="map-pin" class="w-5 h-5 text-white shrink-0"></i>
+                        <span>Mirpur, Dhaka, Bangladesh (Remote Worldwide)</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="film" class="w-5 h-5 text-white shrink-0"></i>
+                        <span>Video Editing & Cinematic Color Grading</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Contact Form (Submits directly to hredoy2001@gmail.com) -->
+            <form id="contact-form" action="https://formsubmit.co/hredoy2001@gmail.com" method="POST"
+                class="lg:col-span-7 flex flex-col gap-4">
+                
+                <!-- FormSubmit Configuration -->
+                <input type="hidden" name="_subject" value="New Website Contact Message for Imtiaz Hossain Hredoy">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_template" value="table">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs uppercase tracking-wider text-zinc-400 font-semibold">Your Name</label>
+                        <input type="text" name="name" required placeholder="John Doe"
+                            class="px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs uppercase tracking-wider text-zinc-400 font-semibold">Your Email</label>
+                        <input type="email" name="email" required placeholder="john@example.com"
+                            class="px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm">
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs uppercase tracking-wider text-zinc-400 font-semibold">Project Details / Message</label>
+                    <textarea name="message" rows="4" required
+                        placeholder="Tell me about your video project, footage type, deadline, and editing requirements..."
+                        class="px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 focus:outline-none focus:border-white transition-colors text-sm resize-none"></textarea>
+                </div>
+
+                <button type="submit"
+                    class="w-full px-8 py-4 rounded-xl bg-white text-black font-bold text-sm hover:bg-zinc-200 transition-all duration-300 shadow-glow flex items-center justify-center gap-2 uppercase tracking-wider mt-2">
+                    <span>SEND MESSAGE</span>
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                </button>
+
+                <a href="https://wa.me/8801641901335?text=Hi%20Imtiaz,%20I'm%20interested%20in%20working%20together%20on%20a%20video%20project!" target="_blank" rel="noopener noreferrer"
+                    class="w-full px-8 py-4 rounded-xl bg-black hover:bg-zinc-900 border border-white/20 text-white font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2.5 uppercase tracking-wider shadow-md">
+                    <svg class="w-4 h-4 fill-current text-white" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                    </svg>
+                    <span>CHAT ON WHATSAPP</span>
+                </a>
+            </form>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div
+            class="mt-16 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
+            <span>© 2026 Imtiaz Hossain Hredoy • Mirpur, Dhaka, Bangladesh</span>
+            <div class="flex items-center gap-6 font-semibold">
+                <a href="#hero" class="hover:text-zinc-300 transition-colors">Back to Top ↑</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- INTERACTIVE VIDEO MODAL -->
+    <div id="video-modal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-2xl hidden opacity-0 transition-all duration-300 p-4 sm:p-8">
+        <div
+            class="relative w-full max-w-5xl bg-zinc-950 border border-white/20 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-black/50">
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+                    <span id="modal-video-counter" class="text-xs font-bold uppercase tracking-widest text-zinc-300">
+                        Edit 1 of 13
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <a id="modal-drive-link" href="#" target="_blank" rel="noopener noreferrer"
+                        class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-semibold text-white flex items-center gap-1.5 transition-colors"
+                        title="Open in Google Drive">
+                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                        <span class="hidden sm:inline">Drive File</span>
+                    </a>
+                    <button onclick="closeVideoModal()"
+                        class="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+                        aria-label="Close Modal">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Video Player Frame Container -->
+            <div class="relative w-full aspect-video bg-black flex items-center justify-center">
+                <iframe id="modal-iframe" class="w-full h-full border-0" allow="autoplay; encrypted-media; fullscreen"
+                    allowfullscreen></iframe>
+            </div>
+
+            <!-- Modal Footer Navigation -->
+            <div class="flex items-center justify-between px-6 py-4 border-t border-white/10 bg-black/50">
+                <button onclick="navigateVideo(-1)"
+                    class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs flex items-center gap-2 transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    <span>Previous Edit</span>
+                </button>
+                <button onclick="navigateVideo(1)"
+                    class="px-4 py-2 rounded-xl bg-white text-black hover:bg-zinc-200 font-bold text-xs flex items-center gap-2 transition-colors">
+                    <span>Next Edit</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 13 GOOGLE DRIVE VIDEO FILES WITH GUARANTEED HIGH QUALITY CINEMATIC THUMBNAILS
+        const videoFiles = [
+            { id: '1ppbOKYLsOXkPKngUy1WzGIdKCvBfPB25', duration: '03:45', name: '1.mp4', thumb: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80' },
+            { id: '1T4h3FGHaiXPC-BQzB2UIdMMLSvH2-l3d', duration: '02:15', name: '2.mp4', thumb: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=800&q=80' },
+            { id: '1micH9YWlzwyIxMoT5jKpn4Xe0xyTefXL', duration: '04:10', name: '3.mp4', thumb: 'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?auto=format&fit=crop&w=800&q=80' },
+            { id: '1epgjcK_CEcqzBxiTh-WwanNJxiKVIOfY', duration: '01:30', name: '4.mp4', thumb: 'https://images.unsplash.com/photo-1537633552985-df8429e8048b?auto=format&fit=crop&w=800&q=80' },
+            { id: '1ID0n5VWBcphikYMrz9LIRfhL5r6wmlK1', duration: '05:00', name: '5.mov', thumb: 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&w=800&q=80' },
+            { id: '1lkAuowqKz3-V3BfkcQfEtke-QBUue4yf', duration: '03:20', name: '6.mp4', thumb: 'https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&w=800&q=80' },
+            { id: '1QrBAsAbUbyveqGw-CSJlscisQL_z-3Li', duration: '02:45', name: '7.mp4', thumb: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=800&q=80' },
+            { id: '1UuzkLia0d2loIAht6F6XJkIekx7K4lZ3', duration: '04:30', name: '8.mp4', thumb: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=800&q=80' },
+            { id: '15gfIbgfRMFjZl3mNEU_FOBIbwZAAA9lq', duration: '02:50', name: '9.mp4', thumb: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80' },
+            { id: '1RgSxoLXlv-uTWzloNwDigPP-bGzSPctd', duration: '03:15', name: '10.mp4', thumb: 'https://images.unsplash.com/photo-1529636798458-92182e662485?auto=format&fit=crop&w=800&q=80' },
+            { id: '19LPzXz1OzQFEp2_tleIY3C2xxHHQe_ho', duration: '01:00', name: '11.mp4', thumb: 'https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&w=800&q=80' },
+            { id: '1HKk3wwz9ue4svwgnGPPB2Juja1Rv24oS', duration: '06:12', name: '12.mp4', thumb: 'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&w=800&q=80' },
+            { id: '11Xmf_NAkBVWA2mN8RVKpuoHlZ22v4hwx', duration: '02:25', name: '13.mp4', thumb: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=800&q=80' }
+        ];
+
+        let currentVideoIndex = 0;
+
+        // Render 13 Pure Visual Video Cards Grid
+        function renderVideoCards() {
+            const grid = document.getElementById('video-cards-grid');
+            grid.innerHTML = '';
+
+            videoFiles.forEach((file, index) => {
+                const card = document.createElement('div');
+                card.className = 'glass-card group cursor-pointer rounded-2xl overflow-hidden flex flex-col transition-all duration-300';
+                card.onclick = () => openVideoModal(file.id, index);
+
+                card.innerHTML = `
+                    <div class="video-card-thumb relative w-full aspect-video bg-zinc-900 overflow-hidden">
+                        <!-- High Quality Cinematic Video Thumbnail -->
+                        <img src="${file.thumb}" 
+                             alt="Video Edit ${index + 1}" 
+                             class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                        
+                        <!-- Gradient Overlay -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent"></div>
+
+                        <!-- Center Play Icon Glow Button -->
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="play-btn-glow w-14 h-14 rounded-full bg-black/60 backdrop-blur-md border border-white/30 text-white flex items-center justify-center shadow-2xl">
+                                <i data-lucide="play" class="w-6 h-6 fill-current ml-1"></i>
+                            </div>
+                        </div>
+
+                        <!-- Top Right Duration Badge -->
+                        <div class="absolute top-3 right-3 px-2.5 py-1 rounded-md bg-black/70 backdrop-blur-md text-[11px] font-bold text-white border border-white/10 tracking-wider">
+                            ${file.duration}
+                        </div>
+
+                        <!-- Bottom Left Index Badge -->
+                        <div class="absolute bottom-3 left-3 px-2.5 py-1 rounded-md bg-white/10 backdrop-blur-md text-[11px] font-bold text-white border border-white/15 tracking-wider">
+                            EDIT #${index + 1}
+                        </div>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        // Open Interactive Video Modal
+        function openVideoModal(driveId, index) {
+            currentVideoIndex = index;
+            const modal = document.getElementById('video-modal');
+            const iframe = document.getElementById('modal-iframe');
+            const driveLink = document.getElementById('modal-drive-link');
+            const counter = document.getElementById('modal-video-counter');
+
+            iframe.src = `https://drive.google.com/file/d/${driveId}/preview`;
+            driveLink.href = `https://drive.google.com/file/d/${driveId}/view`;
+            counter.innerText = `Edit ${index + 1} of ${videoFiles.length}`;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+            }, 10);
+
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close Video Modal
+        function closeVideoModal() {
+            const modal = document.getElementById('video-modal');
+            const iframe = document.getElementById('modal-iframe');
+
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                iframe.src = '';
+            }, 300);
+
+            document.body.style.overflow = 'auto';
+        }
+
+        // Navigate Previous/Next Video
+        function navigateVideo(direction) {
+            currentVideoIndex = (currentVideoIndex + direction + videoFiles.length) % videoFiles.length;
+            const video = videoFiles[currentVideoIndex];
+            openVideoModal(video.id, currentVideoIndex);
+        }
+
+        // Mobile Menu Drawer Toggle
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuBtn.onclick = () => {
+            mobileMenu.classList.toggle('hidden');
+        };
+
+        // Close mobile drawer when link clicked
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.onclick = () => mobileMenu.classList.add('hidden');
+        });
+
+        // FAQ Accordion Toggle
+        document.querySelectorAll('.faq-btn').forEach(btn => {
+            btn.onclick = () => {
+                const answer = btn.nextElementSibling;
+                const icon = btn.querySelector('i');
+                const isHidden = answer.classList.contains('hidden');
+
+                // Close all answers
+                document.querySelectorAll('.faq-answer').forEach(a => a.classList.add('hidden'));
+                document.querySelectorAll('.faq-btn i').forEach(i => i.style.transform = 'rotate(0deg)');
+
+                if (isHidden) {
+                    answer.classList.remove('hidden');
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            };
+        });
+
+        // Ambient Animated Canvas Particles
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.alpha = Math.random() * 0.5 + 0.2;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 45; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        // GSAP ScrollTrigger Animations
+        document.addEventListener('DOMContentLoaded', () => {
+            renderVideoCards();
+            lucide.createIcons();
+
+            gsap.registerPlugin(ScrollTrigger);
+
+            gsap.from('#hero h1', {
+                duration: 1.2,
+                y: 50,
+                opacity: 0,
+                ease: 'power4.out'
+            });
+
+            gsap.from('#hero p', {
+                duration: 1,
+                y: 30,
+                opacity: 0,
+                delay: 0.3,
+                ease: 'power3.out'
+            });
+
+            // Scroll trigger for sections
+            gsap.utils.toArray('section').forEach(sec => {
+                gsap.from(sec.children, {
+                    scrollTrigger: {
+                        trigger: sec,
+                        start: 'top 80%',
+                    },
+                    y: 40,
+                    opacity: 0,
+                    duration: 0.8,
+                    stagger: 0.1,
+                    ease: 'power3.out'
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
