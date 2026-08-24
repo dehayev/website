@@ -47,6 +47,9 @@
         }
     </script>
 
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+
     <!-- GSAP & ScrollTrigger CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -888,59 +891,215 @@
             };
         });
 
-        // Ambient Animated Canvas Particles
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
+        // ─────────────────────────────────────────────────────────────────────
+        // THREE.JS DYNAMIC BACKGROUND — scroll + mouse reactive
+        // ─────────────────────────────────────────────────────────────────────
+        (function initThreeBackground() {
+            const canvas = document.getElementById('bg-canvas');
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+            // Renderer
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0); // transparent — body bg shows through
 
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.5 + 0.5;
-                this.speedX = (Math.random() - 0.5) * 0.3;
-                this.speedY = (Math.random() - 0.5) * 0.3;
-                this.alpha = Math.random() * 0.5 + 0.2;
+            // Scene & Camera
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.set(0, 0, 120);
+
+            // ── STAR FIELD (two layers: near + far) ──────────────────────────
+            function buildStarField(count, spread, size, opacity) {
+                const geo = new THREE.BufferGeometry();
+                const pos = new Float32Array(count * 3);
+                for (let i = 0; i < count * 3; i++) {
+                    pos[i] = (Math.random() - 0.5) * spread;
+                }
+                geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+                const mat = new THREE.PointsMaterial({
+                    color: 0xffffff,
+                    size,
+                    transparent: true,
+                    opacity,
+                    sizeAttenuation: true,
+                    depthWrite: false,
+                });
+                return new THREE.Points(geo, mat);
             }
 
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
+            const starsNear = buildStarField(800, 800, 0.55, 0.85);
+            const starsFar  = buildStarField(2000, 1600, 0.25, 0.4);
+            scene.add(starsNear, starsFar);
 
-                if (this.x < 0) this.x = canvas.width;
-                if (this.x > canvas.width) this.x = 0;
-                if (this.y < 0) this.y = canvas.height;
-                if (this.y > canvas.height) this.y = 0;
-            }
+            // ── FLOATING WIREFRAME RINGS ──────────────────────────────────────
+            const rings = [];
+            const ringData = [
+                { r: 38, tube: 0.18, color: 0x00f0ff, opacity: 0.18, pos: [-50, 30, -60],  rot: [0.4, 0.2, 0] },
+                { r: 22, tube: 0.12, color: 0xd4af37, opacity: 0.22, pos: [ 60,-20, -80],  rot: [0.8,-0.3, 0.5] },
+                { r: 55, tube: 0.10, color: 0xffffff, opacity: 0.10, pos: [  0,  0,-140],  rot: [1.0, 0.5,-0.2] },
+                { r: 16, tube: 0.15, color: 0x00f0ff, opacity: 0.28, pos: [ 30, 55, -50],  rot: [0.2, 0.7, 0.3] },
+                { r: 30, tube: 0.09, color: 0xd4af37, opacity: 0.14, pos: [-70,-40,-100],  rot: [-0.5, 0.4, 0.8] },
+            ];
 
-            draw() {
-                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        for (let i = 0; i < 45; i++) {
-            particles.push(new Particle());
-        }
-
-        function animateCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
+            ringData.forEach(d => {
+                const geo = new THREE.TorusGeometry(d.r, d.tube, 6, 64);
+                const mat = new THREE.MeshBasicMaterial({
+                    color: d.color,
+                    wireframe: true,
+                    transparent: true,
+                    opacity: d.opacity,
+                    depthWrite: false,
+                });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.position.set(...d.pos);
+                mesh.rotation.set(...d.rot);
+                scene.add(mesh);
+                rings.push({ mesh, speed: (Math.random() * 0.003 + 0.001), axis: new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize() });
             });
-            requestAnimationFrame(animateCanvas);
-        }
-        animateCanvas();
+
+            // ── FLOATING LIGHT STREAKS (thin lines) ──────────────────────────
+            function buildStreaks(count) {
+                const group = new THREE.Group();
+                for (let i = 0; i < count; i++) {
+                    const length = Math.random() * 30 + 5;
+                    const geo = new THREE.BufferGeometry();
+                    geo.setAttribute('position', new THREE.BufferAttribute(
+                        new Float32Array([0, 0, 0, length, (Math.random()-0.5)*4, 0]), 3
+                    ));
+                    const alpha = Math.random() * 0.15 + 0.04;
+                    const col = Math.random() > 0.6 ? 0x00f0ff : (Math.random() > 0.5 ? 0xd4af37 : 0xffffff);
+                    const mat = new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: alpha, depthWrite: false });
+                    const line = new THREE.Line(geo, mat);
+                    line.position.set(
+                        (Math.random()-0.5)*400,
+                        (Math.random()-0.5)*300,
+                        (Math.random()-0.5)*200 - 50
+                    );
+                    line.rotation.set(
+                        Math.random()*Math.PI,
+                        Math.random()*Math.PI,
+                        Math.random()*Math.PI
+                    );
+                    group.add(line);
+                }
+                return group;
+            }
+
+            const streaks = buildStreaks(60);
+            scene.add(streaks);
+
+            // ── AMBIENT GLOW SPRITES (soft orbs) ─────────────────────────────
+            function makeGlowSprite(color, size, opacity) {
+                const tex = new THREE.DataTexture(
+                    (() => {
+                        const d = 64, data = new Uint8Array(d*d*4);
+                        const cx = d/2, cy = d/2;
+                        for (let y=0;y<d;y++) for (let x=0;x<d;x++) {
+                            const i=(y*d+x)*4;
+                            const dist = Math.sqrt((x-cx)**2+(y-cy)**2)/(d/2);
+                            const v = Math.max(0, 1-dist*dist) * 255;
+                            data[i]=data[i+1]=data[i+2]=255; data[i+3]=v;
+                        }
+                        return data;
+                    })(),
+                    64, 64, THREE.RGBAFormat
+                );
+                tex.needsUpdate = true;
+                const mat = new THREE.SpriteMaterial({ map: tex, color, transparent: true, opacity, depthWrite: false, blending: THREE.AdditiveBlending });
+                const sprite = new THREE.Sprite(mat);
+                sprite.scale.set(size, size, 1);
+                return sprite;
+            }
+
+            const orbs = [];
+            const orbConfigs = [
+                { color: 0x00f0ff, size: 120, opacity: 0.07, pos: [-80,  60, -120] },
+                { color: 0xd4af37, size: 90,  opacity: 0.08, pos: [ 90, -40,  -90] },
+                { color: 0xffffff, size: 60,  opacity: 0.05, pos: [  0,  80, -100] },
+                { color: 0x00f0ff, size: 50,  opacity: 0.06, pos: [ 50,  30,  -60] },
+            ];
+            orbConfigs.forEach(c => {
+                const orb = makeGlowSprite(c.color, c.size, c.opacity);
+                orb.position.set(...c.pos);
+                scene.add(orb);
+                orbs.push({ sprite: orb, basePos: new THREE.Vector3(...c.pos) });
+            });
+
+            // ── SCROLL & MOUSE STATE ──────────────────────────────────────────
+            let scrollProgress = 0;  // 0–1 over full page height
+            let mouseX = 0, mouseY = 0; // normalised –1..+1
+            let targetCamX = 0, targetCamY = 0;
+            let camBaseY = 0;
+
+            // Section color palette (hue shift of rings/orbs)
+            const sectionColors = [
+                { rings: 0x00f0ff, orbs: 0x002244 },  // hero   — cyan
+                { rings: 0xd4af37, orbs: 0x221800 },  // works  — gold
+                { rings: 0xffffff, orbs: 0x111111 },  // skills — white
+                { rings: 0x00f0ff, orbs: 0x002230 },  // process
+                { rings: 0xd4af37, orbs: 0x221810 },  // insights
+                { rings: 0x00f0ff, orbs: 0x001133 },  // contact
+            ];
+
+            window.addEventListener('scroll', () => {
+                const maxScroll = document.body.scrollHeight - window.innerHeight;
+                scrollProgress = Math.min(window.scrollY / maxScroll, 1);
+                camBaseY = -scrollProgress * 80; // camera drifts down 80 units as page scrolls
+            }, { passive: true });
+
+            window.addEventListener('mousemove', e => {
+                mouseX = (e.clientX / window.innerWidth  - 0.5) * 2;
+                mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+            }, { passive: true });
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            // ── ANIMATION LOOP ────────────────────────────────────────────────
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const t = clock.getElapsedTime();
+
+                // Smooth camera parallax from mouse
+                targetCamX += (mouseX * 12 - targetCamX) * 0.04;
+                targetCamY += (-mouseY * 8 - targetCamY) * 0.04;
+
+                camera.position.x = targetCamX;
+                camera.position.y = camBaseY + targetCamY;
+                camera.lookAt(0, camBaseY, 0);
+
+                // Rotate star fields slowly
+                starsNear.rotation.y = t * 0.018;
+                starsNear.rotation.x = t * 0.007;
+                starsFar.rotation.y  = -t * 0.008;
+
+                // Rotate streaks group
+                streaks.rotation.y = t * 0.012;
+                streaks.rotation.x = Math.sin(t * 0.05) * 0.08;
+
+                // Animate each ring
+                rings.forEach(r => {
+                    r.mesh.rotateOnAxis(r.axis, r.speed);
+                    // pulse opacity with scroll
+                    const base = ringData[rings.indexOf(r)].opacity;
+                    r.mesh.material.opacity = base + Math.sin(t * 0.5 + rings.indexOf(r)) * 0.04 + scrollProgress * 0.06;
+                });
+
+                // Float orbs
+                orbs.forEach((o, i) => {
+                    o.sprite.position.x = o.basePos.x + Math.sin(t * 0.3 + i*1.4) * 8;
+                    o.sprite.position.y = o.basePos.y + Math.cos(t * 0.25+ i*1.1) * 6 + camBaseY * 0.4;
+                });
+
+                renderer.render(scene, camera);
+            }
+            animate();
+        })();
 
         // GSAP ScrollTrigger Animations
         document.addEventListener('DOMContentLoaded', () => {
